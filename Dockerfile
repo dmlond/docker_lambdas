@@ -1,4 +1,5 @@
 FROM alpine
+MAINTAINER Darin London <darin.london@duke.edu>
 
 RUN apk update && apk add docker
 ADD artifacts/interface.sh /usr/local/bin/interface.sh
