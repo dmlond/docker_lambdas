@@ -1,0 +1,11 @@
+version: '2'
+services:
+  lambda:
+    build: .
+    image: docker_lambda_rest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DELIVERY=ARG
+    ports:
+      - 3000:4567
