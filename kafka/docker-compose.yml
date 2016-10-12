@@ -1,0 +1,57 @@
+version: "2"
+
+services:
+  lambda:
+    build: .
+    image: docker_lambda_kafka
+    depends_on:
+      - zookeeper
+      - kafka
+    links:
+      - zookeeper:zookeeper
+      - kafka:kafka
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DELIVERY=STDIN
+  patient:
+    build: patient
+    image: docker_lambda_patient
+    tty: true
+    depends_on:
+      - zookeeper
+      - kafka
+    links:
+      - zookeeper:zookeeper
+      - kafka:kafka
+  zookeeper:
+    container_name: zookeeper
+    image: blacktop/kafka:0.10
+    command: zookeeper-server-start.sh config/zookeeper.properties
+    ports:
+      - 2181:2181
+    network_mode: bridge
+  kafka:
+    image: kafka_service
+    build: kafka_service
+    depends_on:
+      - zookeeper
+    entrypoint: /wait-for-it.sh zookeeper:2181 -s --timeout=5 -- /kafka-entrypoint.sh
+    command: kafka-server-start.sh config/server.properties
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_HEAP_OPTS: "-Xmx2G -Xms2G"
+    ports:
+      - 9092:9092
+    links:
+     - zookeeper
+    extra_hosts:
+      - "kafka:127.0.0.1"
+    volumes:
+      # - kafka-logs:/tmp/kafka-logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: bridge
+# volumes:
+#   kafka-logs:
