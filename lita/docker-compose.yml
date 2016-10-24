@@ -1,0 +1,21 @@
+version: '2'
+services:
+  redis:
+    image: litaio/redis:latest
+    volumes:
+      - ./redis:/var/lib/redis
+  lita:
+    build: .
+    image: docker_lambda_lita
+    volumes:
+      - .:/var/www/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DELIVERY=ARG
+    restart: always
+    links:
+      - redis
+    ports:
+      - 8080:8080
+    env_file:
+      - lita.env
