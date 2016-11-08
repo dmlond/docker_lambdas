@@ -13,6 +13,7 @@ module Lita
       })
 
       def run_lambda(response)
+        # response.reply "RECIEVED #{response.message.body} from #{response.message.source.room_object.inspect}"
         command_args = response.message.body.split(' ')
         command = command_args.shift
         begin
